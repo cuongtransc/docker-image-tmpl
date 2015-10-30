@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+- This file configures the Entity Engine JDBC (or other DataSource) and JTA
+access. For a detailed description see the core/docs/entityconfig.html file.
+-->
+
+<entity-config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entity-config.xsd">
+    <resource-loader class="org.ofbiz.base.config.FileLoader" name="fieldfile" prefix="/framework/entity/fieldtype/"
+                     prepend-env="ofbiz.home"/>
+    <!-- the transaction factory class to use, one is needed for each way of getting JTA interfaces -->
+    <!-- Use this one for Geronimo -->
+    <transaction-factory class="org.ofbiz.geronimo.GeronimoTransactionFactory"/>
+    <!-- Use this one for getting the JTA objects from JNDI -->
+
+    <!-- NOTE: to use the JndiFactory you must specify the necessary JNDI properties
+    <transaction-factory class="org.ofbiz.entity.transaction.JNDIFactory">
+        <user-transaction-jndi jndi-server-name="default" jndi-name="java:comp/UserTransaction"/>
+        <transaction-manager-jndi jndi-server-name="default" jndi-name="java:comp/UserTransaction"/>
+    </transaction-factory>-->
+
+    <!--
+    It is common to use UserTransaction for the TransactionManager, but if that doesn't work, try this:
+    <transaction-manager-jndi jndi-server-name="default" jndi-name="java:comp/TransactionManager"/>
+    Common UserTransaction locations:
+        java:comp/UserTransaction (most servers: Resin, Orion, OC4J, etc)
+        UserTransaction (RexIP)
+    JBoss uses two different objects for the UserTransaction and TransactionManager interfaces;
+    they are located in JNDI at: "java:comp/UserTransaction" and "java:/TransactionManager" respectively
+    the connection factory class to use, one is needed for obtaining connections/pools for defined resources
+    -->
+
+    <connection-factory class="org.ofbiz.entity.connection.DBCPConnectionFactory"/>
+    <debug-xa-resources value="false"/>
+    <!-- see https://issues.apache.org/jira/browse/OFBIZ-4282 for more -->
+    <delegator distributed-cache-clear-enabled="false" entity-eca-reader="main" entity-group-reader="main"
+               entity-model-reader="main" name="default">
+        <group-map datasource-name="localpostgres" group-name="org.ofbiz"/>
+        <group-map datasource-name="localpostolap" group-name="org.ofbiz.olap"/>
+        <group-map datasource-name="localposttenant" group-name="org.ofbiz.tenant"/>
+    </delegator>
+
+    <!-- need to at least define a name for each component to use -->
+    <entity-model-reader name="main"/>
+    <!-- need to at least define a name for each component to use -->
+    <entity-group-reader name="main"/>
+    <!-- need to at least define a name for each component to use -->
+    <entity-eca-reader name="main"/>
+
+    <!-- need to at least define a name for each component to use -->
+    <!-- defining:
+        tenant       = OFBiz and External Tenant Data
+        seed         = OFBiz and External Seed Data - to be maintained along with source and updated whenever a system deployment is updated
+        seed-initial = OFBiz and External Seed Data - to be maintained along with source like other seed data, but only loaded initially and not updated when a system is updated except manually reviewing each line
+        demo         = OFBiz Only Demo Data
+        ext          = External General Data (custom)
+        ext-test     = External Test Data (custom)
+        ext-demo     = External Demo Data (custom)
+    -->
+    <entity-data-reader name="tenant"/>
+    <entity-data-reader name="seed"/>
+    <entity-data-reader name="seed-initial"/>
+    <entity-data-reader name="demo"/>
+    <entity-data-reader name="ext"/>
+    <entity-data-reader name="ext-test"/>
+    <entity-data-reader name="ext-demo"/>
+
+    <field-type name="advantage" loader="fieldfile" location="fieldtypeadvantage.xml"/>
+    <field-type name="axion" loader="fieldfile" location="fieldtypeaxion.xml"/>
+    <field-type name="daffodil" loader="fieldfile" location="fieldtypedaffodil.xml"/>
+    <field-type name="derby" loader="fieldfile" location="fieldtypederby.xml"/>
+    <field-type name="firebird" loader="fieldfile" location="fieldtypefirebird.xml"/>
+    <field-type name="hsql" loader="fieldfile" location="fieldtypehsql.xml"/>
+    <field-type name="mssql" loader="fieldfile" location="fieldtypemssql.xml"/>
+    <field-type name="mysql" loader="fieldfile" location="fieldtypemysql.xml"/>
+    <field-type name="oracle" loader="fieldfile" location="fieldtypeoracle.xml"/>
+    <field-type name="postgres" loader="fieldfile" location="fieldtypepostgres.xml"/>
+    <field-type name="sapdb" loader="fieldfile" location="fieldtypesapdb.xml"/>
+    <field-type name="sybase" loader="fieldfile" location="fieldtypesybase.xml"/>
+
+    <!--
+    For DAO/JDBC Helper: Tries:
+      1. JNDI Datasource IF jdbc.jndi.name, context.provider, etc are specified
+      2. Embedded (JOTM) if available (uses jdbc.driver, jdbc.uri, jdbc.username, jdbc.password, isolation.level)
+      3. Direct to manually laoded JDBC driver (uses jdbc.driver, jdbc.uri, jdbc.username, jdbc.password)
+
+    Transaction Isolation Levels - (<helperName>.isolation.level) can be as follows:
+     * None
+     * ReadCommitted (Recommended)
+     * ReadUncommitted
+     * RepeatableRead
+     * Serializable (NOT Recommended)
+     * Not set uses database default
+    -->
+    <datasource name="localpostgres"
+                add-missing-on-start="true"
+                alias-view-columns="false"
+                check-on-start="true"
+                field-type-name="postgres"
+                helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
+                join-style="ansi"
+                schema-name="public"
+                use-binary-type-for-blob="true"
+                use-fk-initially-deferred="false"
+                use-order-by-nulls="true">
+
+        <read-data reader-name="tenant"/>
+        <read-data reader-name="seed"/>
+        <read-data reader-name="seed-initial"/>
+        <read-data reader-name="demo"/>
+        <read-data reader-name="ext"/>
+
+        <inline-jdbc jdbc-uri="jdbc:postgresql://{{ db['DB_OFBIZ_HOST'] }}:{{ db['DB_OFBIZ_PORT'] }}/{{ db['DB_OFBIZ_DATABASE'] }}"
+                     jdbc-driver="org.postgresql.Driver"
+                     jdbc-username="{{ db['DB_OFBIZ_USERNAME'] }}"
+                     jdbc-password="{{ db['DB_OFBIZ_PASSWORD'] }}"
+                     pool-minsize="2"
+                     pool-maxsize="30"
+                     isolation-level="ReadCommitted"
+                     time-between-eviction-runs-millis="600000"/>
+        <!-- Be warned that at this date (2009-09-20) the max_connections parameters
+        in postgresql.conf is set by default to 100 by the initdb process see
+        http://www.postgresql.org/docs/8.4/static/runtime-config-connection.html#GUC-MAX-CONNECTIONS-->
+    </datasource>
+
+    <datasource name="localpostolap"
+                add-missing-on-start="true"
+                alias-view-columns="false"
+                check-on-start="true"
+                field-type-name="postgres"
+                helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
+                join-style="ansi"
+                result-fetch-size="50"
+                schema-name="public"
+                use-binary-type-for-blob="true"
+                use-fk-initially-deferred="false"
+                use-order-by-nulls="true">
+
+        <read-data reader-name="tenant"/>
+        <read-data reader-name="seed"/>
+        <read-data reader-name="seed-initial"/>
+        <read-data reader-name="demo"/>
+        <read-data reader-name="ext"/>
+
+        <inline-jdbc jdbc-uri="jdbc:postgresql://{{ db['DB_OLAP_HOST'] }}:{{ db['DB_OLAP_PORT'] }}/{{ db['DB_OLAP_DATABASE'] }}"
+                     jdbc-driver="org.postgresql.Driver"
+                     jdbc-username="{{ db['DB_OLAP_USERNAME'] }}"
+                     jdbc-password="{{ db['DB_OLAP_PASSWORD'] }}"
+                     pool-minsize="2"
+                     pool-maxsize="10"
+                     isolation-level="ReadCommitted"
+                     time-between-eviction-runs-millis="600000"/>
+    </datasource>
+
+    <datasource name="localposttenant"
+                add-missing-on-start="true"
+                alias-view-columns="false"
+                check-on-start="true"
+                field-type-name="postgres"
+                helper-class="org.ofbiz.entity.datasource.GenericHelperDAO"
+                join-style="ansi"
+                result-fetch-size="50"
+                schema-name="public"
+                use-binary-type-for-blob="true"
+                use-fk-initially-deferred="false"
+                use-order-by-nulls="true">
+
+        <read-data reader-name="tenant"/>
+        <read-data reader-name="seed"/>
+        <read-data reader-name="seed-initial"/>
+        <read-data reader-name="demo"/>
+        <read-data reader-name="ext"/>
+
+        <inline-jdbc jdbc-uri="jdbc:postgresql://{{ db['DB_TENANT_HOST'] }}:{{ db['DB_TENANT_PORT'] }}/{{ db['DB_TENANT_DATABASE'] }}"
+                     jdbc-driver="org.postgresql.Driver"
+                     jdbc-username="{{ db['DB_TENANT_USERNAME'] }}"
+                     jdbc-password="{{ db['DB_TENANT_PASSWORD'] }}"
+                     pool-minsize="2"
+                     pool-maxsize="10"
+                     isolation-level="ReadCommitted"
+                     time-between-eviction-runs-millis="600000"/>
+    </datasource>
+</entity-config>
