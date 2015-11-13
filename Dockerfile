@@ -8,7 +8,7 @@ FROM tranhuucuong91/java:oracle-java7
 MAINTAINER Tran Huu Cuong "tranhuucuong91@gmail.com"
 
 # using apt-cacher-ng proxy for caching deb package
-RUN echo 'Acquire::http::Proxy "http://172.17.42.1:3142/";' > /etc/apt/apt.conf.d/01proxy
+RUN echo 'Acquire::http::Proxy "http://172.17.0.1:3142/";' > /etc/apt/apt.conf.d/01proxy
 
 ENV REFRESHED_AT 2015-10-22
 
