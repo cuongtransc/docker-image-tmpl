@@ -1,20 +1,9 @@
 #!/bin/bash
 set -e
 
-if [ "$1" = 'start-ofbiz' ]; then
+function gen_config() {
     PATH_OFBIZ=/data/coclab-ofbiz
     PATH_CONFIG=/data/config
-
-    ##################### handle SIGTERM #####################
-    function _term() {
-        printf "%s\n" "Caught terminate signal!"
-        ${PATH_OFBIZ}/ant stop
-
-        # kill -SIGTERM $child 2>/dev/null
-        exit 0
-    }
-
-    trap _term SIGHUP SIGINT SIGTERM SIGQUIT
 
     ##################### generate config #####################
     # List configure files:
@@ -36,6 +25,23 @@ if [ "$1" = 'start-ofbiz' ]; then
     cp ${PATH_CONFIG}/tmpl/build.xml ${PATH_OFBIZ}/build.xml
     cp ${PATH_CONFIG}/tmpl/entityengine.xml ${PATH_OFBIZ}/framework/entity/config/entityengine.xml
     cp ${PATH_CONFIG}/url.properties ${PATH_OFBIZ}/framework/webapp/config/url.properties
+}
+
+# prepare for config default
+gen_config
+
+if [ "$1" = 'start-ofbiz' ]; then
+
+    ##################### handle SIGTERM #####################
+    function _term() {
+        printf "%s\n" "Caught terminate signal!"
+        ${PATH_OFBIZ}/ant stop
+
+        # kill -SIGTERM $child 2>/dev/null
+        exit 0
+    }
+
+    trap _term SIGHUP SIGINT SIGTERM SIGQUIT
 
     ##################### start application #####################
     # start ofbiz
