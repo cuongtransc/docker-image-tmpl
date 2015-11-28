@@ -56,7 +56,9 @@ hello:
     domainname: coclab.lan
     cpu_shares: 512             # 0.5 CPU
     mem_limit: 536870912        # 512 MB RAM
+    memswap_limit: 0            # 0 MB SWAP
     privileged: true
     restart: always
     stdin_open: true
     tty: true
+
