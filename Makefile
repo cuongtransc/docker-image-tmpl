@@ -12,7 +12,7 @@ push:
 	docker push ${DOCKER_IMAGE}:${VERSION}
 
 build-for-private-registry:
-	docker build --tag=${REGISTRY_URL}/${DOCKER_IMAGE}:${VERSION} .
+	docker build --tag=${PRIVATE_REGISTRY_URL}/${DOCKER_IMAGE}:${VERSION} .
 
 push-for-private-registry:
 	docker push ${PRIVATE_REGISTRY_URL}/${DOCKER_IMAGE}:${VERSION}
