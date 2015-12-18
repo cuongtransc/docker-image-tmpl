@@ -1,11 +1,11 @@
-# Author: Tran Huu Cuong
+# Author: Cuong Tran
 #
 # Build: docker build -t tranhuucuong91/app:0.1 .
 # Run: docker run -d -p 8080:8080 --name app-run tranhuucuong91/app:0.1
 #
 
 FROM tranhuucuong91/java:oracle-java7
-MAINTAINER Tran Huu Cuong "tranhuucuong91@gmail.com"
+MAINTAINER Cuong Tran "tranhuucuong91@gmail.com"
 
 # using apt-cacher-ng proxy for caching deb package
 RUN echo 'Acquire::http::Proxy "http://172.17.0.1:3142/";' > /etc/apt/apt.conf.d/01proxy
@@ -30,3 +30,4 @@ COPY docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 CMD ["start-ofbiz"]
+
