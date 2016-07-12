@@ -1,4 +1,4 @@
-PRIVATE_REGISTRY_URL=registry.coclab.lan:5000
+PRIVATE_REGISTRY_URL=ro.lan:5000
 
 DOCKER_IMAGE=tranhuucuong91/app
 VERSION=0.1
