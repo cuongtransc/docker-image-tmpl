@@ -2,63 +2,59 @@
 # Source code address
 # https://hub.docker.com/u/tranhuucuong91/
 #
-# Default configure
-# - username: admin
-# - password: goodday
-#
 # syntax: https://docs.docker.com/compose/yml/
 #
 
-hello:
-    image: tranhuucuong91/app:0.1
-    build: /path/to/build/dir
-    command: bundle exec thin -p 3000
-    links:
-        - db
-        - db:database
-    external_links:
-        - redis_1
-        - project_db_1:mysql
-    ports:
-        - "3000"
-        - "8000:8000"
-        - "127.0.0.1:8001:8001"
-    expose:
-        - "3000"
-    volumes:
-        - ./cache/:/tmp/cache
-        - /var/lib/mysql
-        - ~/configs:/etc/configs/:ro
-    volumes_from:
-        - service_name
-    environment:
-        - TZ=Asia/Saigon
-        - SESSION_SECRET # resolved to values on the machine compose is running on
-    env_file: # Add environment variables from a file. Can be a single value or a list.
-        - .env
-    net: "bridge"
-    net: "none"
-    net: "container:[name or id]"
-    net: "host"
-    dns:
-        - 8.8.8.8
-    cap_add:
-        - ALL
-    cap_drop:
-        - NET_ADMIN
-        - SYS_ADMIN
-    dns_search:
-        - dc1.coclab.lan
-    working_dir: /code
-    entrypoint: /code/entrypoint.sh
-    user: postgresql
-    hostname: foo
-    domainname: coclab.lan
-    cpu_shares: 512             # 0.5 CPU
-    mem_limit: 536870912        # 512 MB RAM
-    memswap_limit: 0            # 0 MB SWAP
-    privileged: true
-    restart: always
-    stdin_open: true
-    tty: true
+version: "2"
 
+services:
+
+    wordpress:
+        image: wordpress:4.5
+        links:
+            - mariadb:mysql
+        ports:
+            - "80:80"
+        networks:
+            - back-tier
+        environment:
+            - WORDPRESS_DB_HOST=mysql
+            - WORDPRESS_DB_USER=wordpress
+            - WORDPRESS_DB_PASSWORD=wordpress@123
+            - WORDPRESS_DB_NAME=wordpress
+        hostname: wordpress
+        domainname: coclab.lan
+        cpu_shares: 512             # 0.5 CPU
+        mem_limit: 536870912        # 512 MB RAM
+        # privileged: true
+        # restart: on-failure:3     # other choice: always
+        # stdin_open: true
+        # tty: true
+
+    mariadb:
+        image: mariadb:10.1
+        #ports:
+            #- "3306:3306"
+        networks:
+            - back-tier
+        volumes:
+            - ./mariadb-data/:/var/lib/mysql/
+        environment:
+            - MYSQL_ROOT_PASSWORD=lab@secret
+            - MYSQL_USER=wordpress
+            - MYSQL_PASSWORD=wordpress@123
+            - MYSQL_DATABASE=wordpress
+        hostname: mariadb
+        domainname: coclab.lan
+        cpu_shares: 512             # 0.5 CPU
+        mem_limit: 536870912        # 512 MB RAM
+        # privileged: true
+        # restart: on-failure:3     # other choice: always
+        # stdin_open: true
+        # tty: true
+
+networks:
+    back-tier:
+
+# volumes:
+#     db-data:
