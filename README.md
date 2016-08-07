@@ -1,5 +1,5 @@
 # docker-image-tmpl
-docker images template
+Docker Image Template
 
 
 ## [Vietnamese] Giới thiệu về cơ chế run process trong container
