@@ -2,7 +2,7 @@
 # Source code address
 # https://hub.docker.com/u/tranhuucuong91/
 #
-# syntax: https://docs.docker.com/compose/yml/
+# syntax: https://docs.docker.com/compose/compose-file/
 #
 
 version: "2"
