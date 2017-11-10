@@ -1,6 +1,6 @@
 PRIVATE_REGISTRY_URL=ro.lan:5000
 
-DOCKER_IMAGE=tranhuucuong91/app
+DOCKER_IMAGE=cuongtransc/app
 VERSION=0.1
 
 all: build
