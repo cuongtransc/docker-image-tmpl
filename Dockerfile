@@ -5,7 +5,7 @@
 #
 
 FROM cuongtransc/java:oracle-java7
-MAINTAINER Cuong Tran "cuongtransc@gmail.com"
+LABEL maintainer="cuongtransc@gmail.com"
 
 # using apt-cacher-ng proxy for caching deb package
 RUN echo 'Acquire::http::Proxy "http://172.17.0.1:3142/";' > /etc/apt/apt.conf.d/01proxy
